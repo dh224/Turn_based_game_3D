@@ -34,7 +34,6 @@ public class TileMap : MonoBehaviour
 
     private void unitEndMovement(Node end)
     {
-        Debug.Log("end:" + end.x +"," + end.y);
         showMovementRange(end.x, end.y);
     }
     private void lightingCubes(List<Node> list)
