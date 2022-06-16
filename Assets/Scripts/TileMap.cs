@@ -15,23 +15,51 @@ public class TileMap : MonoBehaviour
     public Unit[] units;
     public static int mapSizeX = 10;
     public static int mapSizeY = 10;
+
+
+    private UnitsMovements _unitsMovements;
     void Start()
     {
-        EventSystem.instance.onEndMovement += unitEndMovement;
-        EventSystem.instance.onLightingPathCubes += lightingCubes;
+        _unitsMovements = new UnitsMovements();
+        onloadEvents();
+        
         generateMapData();
         generatePathfindingGraph();
         generateMapvisual();
         showMovementRange((int) selectUnit.transform.position.x, (int) selectUnit.transform.position.z);
     }
 
-    public void selectUnitMove(List<Node> list)
+    public void selectUnitMove(List<Node> route)
     {
         MapUI.instance.clearMovementUIs();
         MapUI.instance.clearPathUIs();
-        selectUnit.GetComponent<Unit>().Move(list);
+        Command moveTo = new MoveToTileCommand(selectUnit.GetComponent<Unit>(), route);
+        _unitsMovements.addCommand(moveTo);
     }
 
+    private void onloadEvents()
+    {
+        EventSystem.instance.onEndMovement += unitEndMovement;
+        EventSystem.instance.onLightingPathCubes += lightingCubes;
+        EventSystem.instance.onClickableTileClicked += clickableTileClicked;
+    }
+
+    private void clickableTileClicked(int x, int y)
+    {
+        Debug.Log("点击的位置：" + x +" " + y);
+        if (selectUnit == null)
+        {
+            //显示该砖块的信息
+        }
+        else
+        {
+            if (isInMovementRange(x, y))
+            {
+                selectUnitMove(generatePathWithSelectedUnit(x, y));
+            }
+        }
+    }
+    
     private void unitEndMovement(Node end)
     {
         showMovementRange(end.x, end.y);
@@ -114,10 +142,6 @@ public class TileMap : MonoBehaviour
     void showMovementRange(int x1, int y1)
     {
         List<Node> moveRange = getMovementRange(x1, y1);
-        foreach (var m in moveRange)
-        {
-            Debug.Log(m.x + ", " + m.y);
-        }
         MapUI.instance.showMovementRange(moveRange);
     }
     void generateMapData()

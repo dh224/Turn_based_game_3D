@@ -7,6 +7,7 @@ public class Click_Tile : MonoBehaviour
     public int tileX;
     public int tileY;
     public TileMap map;
+    
 
     void Start()
     {
@@ -14,11 +15,7 @@ public class Click_Tile : MonoBehaviour
     }
     void OnMouseUp()
     {
-        if (map.isInMovementRange(tileX, tileY) == true)
-        {
-            List<Node> path =  map.generatePathWithSelectedUnit(tileX, tileY);
-            map.selectUnitMove(path);
-        }
+        EventSystem.instance.ClickableTileClicked(tileX, tileY);
     }
     void OnMouseEnter()
     {

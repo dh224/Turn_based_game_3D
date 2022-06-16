@@ -9,6 +9,7 @@ public class Unit : MonoBehaviour
     public int tileX;
     public int tileY;
     public int movementAbility;
+    public bool isOnTurn;
 
     IEnumerator moveCoroutine;
     private List<Node> pathWay;

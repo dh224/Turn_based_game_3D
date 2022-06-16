@@ -10,9 +10,19 @@ public class EventSystem : MonoBehaviour
     public event Action<Node> onEndMovement;
     public event Action<List<Node>> onLightingPathCubes;
     public event Action<List<Node>> onShowPathArrow;
+
+    public event Action<int, int> onClickableTileClicked;
     private void Awake()
     {
         instance = this;
+    }
+
+    public void ClickableTileClicked(int x, int y)
+    {
+        if (onClickableTileClicked != null)
+        {
+            onClickableTileClicked(x, y);
+        }
     }
 
     public void EndMovement(Node n)
