@@ -29,7 +29,7 @@ public class Unit : MonoBehaviour
             {
                 StopCoroutine(moveCoroutine);
             }
-            moveCoroutine = MoveTo_Coroutine(target, 20f);
+            moveCoroutine = MoveTo_Coroutine(target, 16f);
             StartCoroutine(moveCoroutine);
             yield return moveCoroutine;
         }

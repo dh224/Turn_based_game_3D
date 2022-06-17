@@ -4,17 +4,22 @@ using UnityEngine;
 
 public class UnitsMovements
 {
-    private List<Command> _commands;
+    private Stack<Command> _commands;
 
     public UnitsMovements()
     {
-        _commands = new List<Command>();
+        _commands = new Stack<Command>();
     }
 
     public void addCommand(Command newCommand)
     {
+       _commands.Push(newCommand); 
         newCommand.execute();
-       _commands.Add(newCommand); 
     }
 
+    public void undoCommand()
+    {
+        var lastCommand = _commands.Pop();
+        lastCommand.undo();
+    }
 }

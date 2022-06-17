@@ -16,7 +16,6 @@ public class TileMap : MonoBehaviour
     public static int mapSizeX = 10;
     public static int mapSizeY = 10;
 
-
     private UnitsMovements _unitsMovements;
     void Start()
     {
@@ -28,13 +27,12 @@ public class TileMap : MonoBehaviour
         generateMapvisual();
         showMovementRange((int) selectUnit.transform.position.x, (int) selectUnit.transform.position.z);
     }
-
     public void selectUnitMove(List<Node> route)
     {
         MapUI.instance.clearMovementUIs();
         MapUI.instance.clearPathUIs();
-        Command moveTo = new MoveToTileCommand(selectUnit.GetComponent<Unit>(), route);
-        _unitsMovements.addCommand(moveTo);
+        Command unitMoveTo = new MoveToTileCommand(selectUnit.GetComponent<Unit>(), route);
+        _unitsMovements.addCommand(unitMoveTo);
     }
 
     private void onloadEvents()
@@ -46,7 +44,7 @@ public class TileMap : MonoBehaviour
 
     private void clickableTileClicked(int x, int y)
     {
-        Debug.Log("点击的位置：" + x +" " + y);
+        Debug.Log("点击的位置：" + x + " " + y);
         if (selectUnit == null)
         {
             //显示该砖块的信息

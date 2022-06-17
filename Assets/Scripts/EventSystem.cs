@@ -12,6 +12,7 @@ public class EventSystem : MonoBehaviour
     public event Action<List<Node>> onShowPathArrow;
 
     public event Action<int, int> onClickableTileClicked;
+    
     private void Awake()
     {
         instance = this;

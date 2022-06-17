@@ -15,4 +15,10 @@ public class MoveToTileCommand : Command
     {
         _unit.Move(_route);
     }
+
+    public void undo()
+    {
+        _route.Reverse();
+        _unit.Move(_route);
+    }
 }
