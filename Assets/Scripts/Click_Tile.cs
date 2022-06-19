@@ -19,10 +19,10 @@ public class Click_Tile : MonoBehaviour
     }
     void OnMouseEnter()
     {
-        if (map.isInMovementRange(tileX, tileY) == true)
-        {
-            List<Node> path =  map.generatePathWithSelectedUnit(tileX, tileY);
-            MapUI.instance.showPathUI(path);
-        }
+        // if (map.isInMovementRange(tileX, tileY) == true)
+        // {
+        //     List<Node> path =  map.generatePathWithSelectedUnit(tileX, tileY);
+        //     MapUI.instance.showPathUI(path);
+        // }
     }
 }

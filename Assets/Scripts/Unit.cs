@@ -18,8 +18,18 @@ public class Unit : MonoBehaviour
     {
         pathWay = list;
         StartCoroutine(MoveWithPathway());
-        this.movementAbility = (int) list[list.Count - 1].remainMovement;
-        EventSystem.instance.EndMovement(list[list.Count - 1]);
+        // Debug.Log("当前剩余的行动力：" + movementAbility);
+    }
+
+    public int minusMovementAbility(float m)
+    {
+        this.movementAbility -= (int)m;
+        return this.movementAbility;
+    }
+    public int plusMovementAbility(float m)
+    {
+        this.movementAbility += (int)m;
+        return this.movementAbility;
     }
     IEnumerator MoveWithPathway()
     {
@@ -33,6 +43,7 @@ public class Unit : MonoBehaviour
             StartCoroutine(moveCoroutine);
             yield return moveCoroutine;
         }
+        EventSystem.instance.EndMovement(this);
     }
     
     IEnumerator MoveTo_Coroutine(Node target, float speed)

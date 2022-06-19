@@ -52,17 +52,19 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\UnitsMovements.cs" />
      <Compile Include="Assets\Scripts\Node.cs" />
      <Compile Include="Assets\MapUI.cs" />
      <Compile Include="Assets\Scripts\Click_Tile.cs" />
+     <Compile Include="Assets\Scripts\Command.cs" />
+     <Compile Include="Assets\Scripts\MoveToTileCommand.cs" />
      <Compile Include="Assets\Scripts\TileMap.cs" />
      <Compile Include="Assets\Scripts\TileType.cs" />
      <Compile Include="Assets\Scripts\EventSystem.cs" />
      <Compile Include="Assets\Scripts\Unit.cs" />
      <Compile Include="Assets\UnitController.cs" />
-     <Compile Include="Assets\Scripts\Command.cs" />
-     <Compile Include="Assets\Scripts\MoveToTileCommand.cs" />
-     <Compile Include="Assets\Scripts\UnitsMovements.cs" />
+     <Compile Include="Assets\Scripts\UndoButton.cs" />
+     <Compile Include="Assets\Scripts\UnitManager.cs" />
      <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
      <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />

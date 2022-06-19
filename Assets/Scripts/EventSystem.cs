@@ -1,21 +1,32 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class EventSystem : MonoBehaviour
 {
     public static EventSystem instance;
 
-    public event Action<Node> onEndMovement;
+    public event Action<Unit> onEndMovement;
     public event Action<List<Node>> onLightingPathCubes;
     public event Action<List<Node>> onShowPathArrow;
+
+    public event Action onUndobuttonClicked;
 
     public event Action<int, int> onClickableTileClicked;
     
     private void Awake()
     {
         instance = this;
+    }
+
+    public void UndobuttonClicked()
+    {
+        if (onUndobuttonClicked != null)
+        {
+            onUndobuttonClicked();
+        }
     }
 
     public void ClickableTileClicked(int x, int y)
@@ -26,11 +37,11 @@ public class EventSystem : MonoBehaviour
         }
     }
 
-    public void EndMovement(Node n)
+    public void EndMovement(Unit u)
     {
         if (onEndMovement != null)
         {
-            onEndMovement(n);
+            onEndMovement(u);
         }
     }
     

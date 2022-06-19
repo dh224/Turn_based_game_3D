@@ -10,7 +10,8 @@ public class TileMap : MonoBehaviour
     private int[,] tiles;
     private Node[,] graph;
     private GameObject[,] mapInstances = new GameObject[mapSizeX, mapSizeY];
-    public GameObject selectUnit;
+    public GameObject selectedUnitObject;
+    public Unit selectedUnit;
 
     public Unit[] units;
     public static int mapSizeX = 10;
@@ -21,31 +22,36 @@ public class TileMap : MonoBehaviour
     {
         _unitsMovements = new UnitsMovements();
         onloadEvents();
-        
         generateMapData();
         generatePathfindingGraph();
         generateMapvisual();
-        showMovementRange((int) selectUnit.transform.position.x, (int) selectUnit.transform.position.z);
+        showMovementRange((int) selectedUnitObject.transform.position.x, (int) selectedUnitObject.transform.position.z);
+        this.selectedUnit = selectedUnitObject.GetComponent<Unit>();
     }
-    public void selectUnitMove(List<Node> route)
+    public void selectUnitMove(List<Node> route, float mobility)
     {
         MapUI.instance.clearMovementUIs();
         MapUI.instance.clearPathUIs();
-        Command unitMoveTo = new MoveToTileCommand(selectUnit.GetComponent<Unit>(), route);
+        Command unitMoveTo = new MoveToTileCommand(selectedUnit, route, mobility);
         _unitsMovements.addCommand(unitMoveTo);
     }
 
     private void onloadEvents()
     {
+        EventSystem.instance.onUndobuttonClicked += UndoCommand;
         EventSystem.instance.onEndMovement += unitEndMovement;
         EventSystem.instance.onLightingPathCubes += lightingCubes;
         EventSystem.instance.onClickableTileClicked += clickableTileClicked;
     }
 
+    private void UndoCommand()
+    {
+        _unitsMovements.undoCommand();
+    }
+
     private void clickableTileClicked(int x, int y)
     {
-        Debug.Log("点击的位置：" + x + " " + y);
-        if (selectUnit == null)
+        if (selectedUnitObject == null)
         {
             //显示该砖块的信息
         }
@@ -53,14 +59,19 @@ public class TileMap : MonoBehaviour
         {
             if (isInMovementRange(x, y))
             {
-                selectUnitMove(generatePathWithSelectedUnit(x, y));
+                float mobility = 0f;
+                var route = generatePathWithSelectedUnit(x, y, out mobility);
+                // Debug.Log("aaa " + mobility);
+                selectUnitMove(route, mobility);
             }
         }
     }
     
-    private void unitEndMovement(Node end)
+    private void unitEndMovement(Unit end)
     {
-        showMovementRange(end.x, end.y);
+        end.tileX = (int) end.transform.position.x;
+        end.tileY = (int) end.transform.position.z;
+        showMovementRange(end.tileX, end.tileY);
     }
     private void lightingCubes(List<Node> list)
     {
@@ -100,8 +111,42 @@ public class TileMap : MonoBehaviour
 
     public bool isInMovementRange(int x1, int y1)
     {
-        return getMovementRange((int) selectUnit.transform.position.x, (int) selectUnit.transform.position.z)
+        return getMovementRangeToCheck((int) selectedUnitObject.transform.position.x, (int) selectedUnitObject.transform.position.z)
             .Contains(graph[x1, y1]);
+    }
+    public List<Node> getMovementRangeToCheck(int x1, int y1)
+    {
+        List<Node> moveRange = new List<Node>();
+        for (int x = 0; x < mapSizeX; x++)
+        {
+            for (int y = 0; y < mapSizeY; y++)
+            {
+                graph[x, y].isVisited_movementRange = false;
+            }
+        }
+        Node root = graph[x1, y1];
+        root.isVisited_movementRange = true;
+        root.remainMovement =
+            selectedUnit.movementAbility;
+        Queue<Node> Q = new Queue<Node>();
+        Q.Enqueue(root);
+        while (Q.Count > 0)
+        {
+            Node v = Q.Dequeue();
+            foreach (var vn in v.neighbours)
+            {
+                if (vn.isVisited_movementRange)
+                    continue;
+                if (v.remainMovement - (1 + vn.nodeType.extraCost) >= 0)
+                {
+                    vn.remainMovement = v.remainMovement - (1 + vn.nodeType.extraCost);
+                    vn.isVisited_movementRange = true;
+                    moveRange.Add(vn);
+                    Q.Enqueue(vn);
+                }
+            }
+        }
+        return moveRange;
     }
     public List<Node> getMovementRange(int x1, int y1)
     {
@@ -116,7 +161,8 @@ public class TileMap : MonoBehaviour
         Node root = graph[x1, y1];
         root.isVisited_movementRange = true;
         root.remainMovement =
-            selectUnit.GetComponent<Unit>().movementAbility;
+            selectedUnit.movementAbility;
+        Debug.Log("起点的移动力：" + root.remainMovement );
         Queue<Node> Q = new Queue<Node>();
         Q.Enqueue(root);
         while (Q.Count > 0)
@@ -171,13 +217,21 @@ public class TileMap : MonoBehaviour
         }
     }
 
-    public List<Node> generatePathWithSelectedUnit(int x, int y)
+    public List<Node> generatePathWithSelectedUnit(int x, int y, out float moveUnitMobility)
     {
-        var path =  generatePath((int)selectUnit.transform.position.x, (int)selectUnit.transform.position.z, x, y);
+        moveUnitMobility = 0f;
+        var path =  generatePath((int)selectedUnitObject.transform.position.x, (int)selectedUnitObject.transform.position.z, x, y, selectedUnit, out moveUnitMobility);
         return path;
     }
-    public List<Node> generatePath(int startX, int startY, int targetX, int targetY)
+    public List<Node> generatePathWithSelectedUnit(int x, int y)
     {
+        float moveUnitMobility = 0f;
+        var path =  generatePath((int)selectedUnitObject.transform.position.x, (int)selectedUnitObject.transform.position.z, x, y, selectedUnit, out moveUnitMobility);
+        return path;
+    }
+    public List<Node> generatePath(int startX, int startY, int targetX, int targetY, Unit moveUnit, out float mobilityCost)
+    {
+        mobilityCost = 0f;
         if (startX == targetX && startY == targetY)
         {
             List<Node> a = new List<Node>();
@@ -221,7 +275,8 @@ public class TileMap : MonoBehaviour
             }
             if (current.x == targetX && current.y == targetY)
             {
-                return reconstruct_path(cameFrom,current);
+                mobilityCost = 0f;
+                return reconstruct_path(cameFrom,current, moveUnit,out mobilityCost);
             }
             open.Remove(current);
             foreach (var neighbour in current.neighbours)
@@ -247,13 +302,16 @@ public class TileMap : MonoBehaviour
         return null;
     }
 
-    private List<Node> reconstruct_path(Dictionary<Node, Node> cameFrom,Node current)
+    private List<Node> reconstruct_path(Dictionary<Node, Node> cameFrom,Node current, Unit unit, out float mobility)
     {
+        mobility = 0f;
         List<Node> path = new List<Node>();
         path.Add(current);
         while (cameFrom.ContainsKey(current))
         {
-            path.Add(cameFrom[current]);
+            var next = cameFrom[current];
+            mobility += (1 + next.nodeType.extraCost);
+            path.Add(next);
             current = cameFrom[current];
         }
         path.Reverse();

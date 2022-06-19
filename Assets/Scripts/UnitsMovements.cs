@@ -13,13 +13,21 @@ public class UnitsMovements
 
     public void addCommand(Command newCommand)
     {
-       _commands.Push(newCommand); 
         newCommand.execute();
+       _commands.Push(newCommand); 
     }
 
     public void undoCommand()
     {
-        var lastCommand = _commands.Pop();
-        lastCommand.undo();
+        if (_commands.Count > 0)
+        {
+            var lastCommand = _commands.Pop();
+            lastCommand.undo();
+        }
+    }
+
+    public int getCommandsCount()
+    {
+        return _commands.Count;
     }
 }
